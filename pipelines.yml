@@ -1,18 +1,3 @@
-resources:
-  - name:       art-file
-    type:       FileSpec
-    configuration:     
-      sourceArtifactory:    art
-      pattern:              generic-local/
-      
-resources:
-  - name:       build
-    type: BuildInfo
-    configuration:
-      sourceArtifactory:    art
-      buildName:            build1
-      buildNumber:          1
-      
 pipeline:
   - name: pipe1
     steps:
