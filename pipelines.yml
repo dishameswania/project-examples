@@ -1,1 +1,39 @@
-abcd
+resources:
+  - name:       art-file
+    type:       FileSpec
+    configuration:     
+      sourceArtifactory:    art
+      pattern:              generic-local/
+      
+resources:
+  - name:       build
+    type: BuildInfo
+    configuration:
+      sourceArtifactory:    art
+      buildName:            build1
+      buildNumber:          1
+      
+pipeline:
+  - name: pipe1
+    steps:
+    - name: push_to_rt
+        type: push
+            # for docker build
+            targetRepo: example-local-repo/
+ 
+        requires:
+          integrations:
+            # One Artifactory integration is mandatory
+            - art
+        
+        execution:
+          onStart:
+            - echo "Prepping build environment"
+          onSuccess:
+            - echo "Job well done!"
+          onFailure:
+            - echo "uh oh, something went wrong"
+          onComplete: #always
+            - echo "Cleaning up some stuff"
+          onCancel:
+            - echo "Someone cancelled the job"
