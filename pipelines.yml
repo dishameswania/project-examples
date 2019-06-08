@@ -2,6 +2,7 @@ resources:
   - name:       Git
     type:       GitRepo
     configuration:
+      gitProvider:  Github
       repository:   github-disha
       path:         dishameswania/project-examples
     buildOn:
