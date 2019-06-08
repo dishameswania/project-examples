@@ -12,7 +12,7 @@ pipeline:
   - name: pipe1
     steps:
     - name: try1
-      type: bash
+      type: Bash
       
       triggeredBy:
           resources:
