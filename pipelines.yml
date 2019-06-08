@@ -1,9 +1,24 @@
+resources:
+  - name:       Git
+    type:       GitRepo
+    configuration:
+      repository:   github-disha
+      path:         dishameswania/project-examples
+    buildOn:
+      commit: true     
+
 pipeline:
   - name: pipe1
     steps:
     - name: try1
       type: bash
-        
+      
+      triggeredBy:
+          resources:
+            - Git
+          steps:
+            - try1
+            
       execution:
           onStart:
             - echo "Prepping build environment"
