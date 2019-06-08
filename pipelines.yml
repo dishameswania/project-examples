@@ -1,19 +1,14 @@
 pipeline:
   - name: pipe1
     steps:
-    - name: push_to_rt
-        type: push
-            # for docker build
-            targetRepo: example-local-repo/
- 
-        requires:
-          integrations:
-            # One Artifactory integration is mandatory
-            - art
+    - name: try1
+        type: bash
         
         execution:
           onStart:
             - echo "Prepping build environment"
+          onExecution:
+            - echo "Executing step 1"
           onSuccess:
             - echo "Job well done!"
           onFailure:
