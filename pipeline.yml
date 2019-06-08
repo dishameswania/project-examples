@@ -13,16 +13,10 @@ pipelines:
     steps:
     - name: try1
       type: Bash
-      
-      triggeredBy:
-          resources:
-            - Git
             
       execution:
           onStart:
             - echo "Prepping build environment"
-          onExecution:
-            - echo "Executing step 1"
           onSuccess:
             - echo "Job well done!"
           onFailure:
