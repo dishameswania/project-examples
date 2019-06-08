@@ -17,6 +17,8 @@ pipelines:
       execution:
           onStart:
             - echo "Prepping build environment"
+          onExecute:
+            - echo "hey, I am running"
           onSuccess:
             - echo "Job well done!"
           onFailure:
