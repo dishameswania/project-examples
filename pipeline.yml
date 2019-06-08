@@ -17,8 +17,6 @@ pipeline:
       triggeredBy:
           resources:
             - Git
-          steps:
-            - try1
             
       execution:
           onStart:
