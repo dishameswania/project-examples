@@ -2,9 +2,9 @@ pipeline:
   - name: pipe1
     steps:
     - name: try1
-        type: bash
+      type: bash
         
-        execution:
+      execution:
           onStart:
             - echo "Prepping build environment"
           onExecution:
