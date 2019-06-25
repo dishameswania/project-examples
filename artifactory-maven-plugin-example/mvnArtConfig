@@ -1,10 +1,10 @@
-version: 1
+ version: 1
 type: maven
 resolver:
   snapshotRepo: libs-snapshot
   releaseRepo: libs-release
-  serverID: artDisha
+  serverID: Default-Server
 deployer:
   snapshotRepo: libs-snapshot-local
   releaseRepo: libs-release-local
-  serverID: artDisha
+  serverID: Default-Server
