@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.+')
-    }
-    configurations.classpath {
-        resolutionStrategy {
-            cacheDynamicVersionsFor 0, 'seconds'
-            cacheChangingModulesFor 0, 'seconds'
-        }
-    }
+plugins {
+    id("com.jfrog.artifactory") version "5.+"
 }
 
 def javaProjects() {
@@ -40,11 +29,13 @@ allprojects {
     status = 'Integration'
     repositories {
         maven {
-            url "http://localhost:8081/artifactory/jcenter"
+            url "http://127.0.0.1:8081/artifactory/libs-release"
         }
     }
 }
 
+// Setting this property to true will make the artifactoryPublish task
+// skip this module (in our case, the root module):
 artifactoryPublish.skip = true
 
 project('services') {
@@ -56,7 +47,7 @@ configure(javaProjects()) {
     apply plugin: 'maven-publish'
 
     dependencies {
-        testCompile 'junit:junit:4.7'
+        testImplementation 'junit:junit:4.7'
     }
 
     publishing {
@@ -98,13 +89,11 @@ project('api') {
     }
 }
 
-artifactoryPublish.skip = true
-
 artifactory {
     clientConfig.setIncludeEnvVars(true)
     clientConfig.info.addEnvironmentProperty('test.adding.dynVar',new java.util.Date().toString())
 
-    contextUrl = 'http://localhost:8081/artifactory'
+    contextUrl = 'http://127.0.0.1:8081/artifactory'
     publish {
         repository {
             repoKey = 'libs-snapshot-local' // The Artifactory repository key to publish to
