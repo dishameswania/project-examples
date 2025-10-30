@@ -4,6 +4,9 @@
   "scripts": {
     "start": "node helloworld"
   },
+  "publishConfig": {
+    "registry": "https://supportfly.jfrog.io/artifactory/api/npm/"
+  },
   "dependencies": {
     "send": "^0.16.2"
   },

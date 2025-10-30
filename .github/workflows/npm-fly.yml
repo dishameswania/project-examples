@@ -1,0 +1,46 @@
+name: NPM Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup JFrog Fly
+        uses: jfrog/fly-action@v1
+        with:
+          url: https://supportfly.jfrog.io
+
+      - name: Install dependencies
+        working-directory: npm-example
+        run: npm ci
+
+      - name: Build and test
+        working-directory: npm-example
+        run: npm test || echo "No test script defined"
+
+      - name: Publish to Fly
+        if: github.event_name != 'pull_request'
+        working-directory: npm-example
+        run: npm publish
+
