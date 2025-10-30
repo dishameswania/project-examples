@@ -1,0 +1,80 @@
+name: Python Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup JFrog Fly
+        uses: jfrog/fly-action@v1
+        with:
+          url: https://supportfly.jfrog.io
+
+      - name: Install build tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Install project dependencies
+        working-directory: python-example/pip-example
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run project
+        working-directory: python-example/pip-example
+        run: |
+          python -c "from pythonExample.pythonProj import printme; printme('Hello from CI')"
+
+      - name: Build package
+        working-directory: python-example/pip-example
+        run: |
+          python -m build
+
+      - name: Configure twine auth for Fly
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p ~/.pypirc
+          cat > ~/.pypirc << 'EOF'
+          [distutils]
+          index-servers = fly
+
+          [fly]
+          repository = ${FLY_PYPI_URL}
+          username = __token__
+          password = ${FLY_PYPI_TOKEN}
+          EOF
+        env:
+          FLY_PYPI_URL: ${{ secrets.FLY_PYPI_URL }}
+          FLY_PYPI_TOKEN: ${{ secrets.FLY_PYPI_TOKEN }}
+
+      - name: Publish to Fly (twine)
+        if: github.event_name != 'pull_request'
+        working-directory: python-example/pip-example
+        env:
+          FLY_PYPI_URL: ${{ secrets.FLY_PYPI_URL }}
+          FLY_PYPI_TOKEN: ${{ secrets.FLY_PYPI_TOKEN }}
+        run: |
+          twine upload -r fly dist/*
+
+
