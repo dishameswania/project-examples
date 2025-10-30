@@ -39,6 +39,13 @@ jobs:
         working-directory: npm-example
         run: npm test || echo "No test script defined"
 
+      - name: Configure npm auth for Fly
+        run: |
+          echo "//supportfly.jfrog.io/artifactory/api/npm/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.FLY_TOKEN }}
+
       - name: Publish to Fly
         if: github.event_name != 'pull_request'
         working-directory: npm-example
