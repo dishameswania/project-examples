@@ -44,15 +44,5 @@ jobs:
       - name: Publish to Fly
         if: github.event_name != 'pull_request'
         working-directory: gradle-examples/gradle-example-publish
-        env:
-          FLY_URL: https://supportfly.jfrog.io
-          FLY_REPO: libs-release-local
-          GITHUB_ACTOR: ${{ github.actor }}
-        run: |
-          ./gradlew publish \
-            -PflyUrl=${FLY_URL} \
-            -PflyRepo=${FLY_REPO} \
-            -PflyUsername=${GITHUB_ACTOR} \
-            -PflyPassword=${JF_ACCESS_TOKEN} \
-            --no-daemon
+        run: ./gradlew publish 
 
