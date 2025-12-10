@@ -1,0 +1,58 @@
+name: Gradle Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup JFrog Fly
+        uses: jfrog/fly-action@v1
+        with:
+          url: https://supportfly.jfrog.io
+
+      - name: Grant execute permission for gradlew
+        working-directory: gradle-examples/gradle-example-publish
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        working-directory: gradle-examples/gradle-example-publish
+        run: ./gradlew build --no-daemon
+
+      - name: Publish to Fly
+        if: github.event_name != 'pull_request'
+        working-directory: gradle-examples/gradle-example-publish
+        env:
+          FLY_URL: https://supportfly.jfrog.io
+          FLY_REPO: libs-release-local
+          FLY_USERNAME: ${{ secrets.FLY_USERNAME }}
+          FLY_PASSWORD: ${{ secrets.FLY_PASSWORD }}
+        run: |
+          ./gradlew publish \
+            -PflyUrl=${FLY_URL} \
+            -PflyRepo=${FLY_REPO} \
+            -PflyUsername=${FLY_USERNAME} \
+            -PflyPassword=${FLY_PASSWORD} \
+            --no-daemon
+

@@ -57,6 +57,18 @@ configure(javaProjects()) {
                 artifact(file("$rootDir/gradle.properties"))
             }
         }
+        repositories {
+            maven {
+                name = "Fly"
+                url = project.hasProperty('flyUrl') && project.hasProperty('flyRepo') 
+                    ? "${project.property('flyUrl')}/artifactory/${project.property('flyRepo')}"
+                    : uri("https://supportfly.jfrog.io/artifactory/libs-release-local")
+                credentials {
+                    username = project.findProperty('flyUsername') ?: System.getenv('FLY_USERNAME') ?: ''
+                    password = project.findProperty('flyPassword') ?: System.getenv('FLY_PASSWORD') ?: ''
+                }
+            }
+        }
     }
 }
 
