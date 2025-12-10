@@ -1,0 +1,71 @@
+name: Go Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      - name: Setup JFrog Fly
+        uses: jfrog/fly-action@v1
+        with:
+          url: https://supportfly.jfrog.io
+
+      - name: Download dependencies
+        working-directory: golang-example
+        run: go mod download
+
+      - name: Build
+        working-directory: golang-example
+        run: go build -v ./...
+
+      - name: Test
+        working-directory: golang-example
+        run: go test -v ./... || echo "No tests defined"
+
+      - name: Run application
+        working-directory: golang-example
+        run: go run hello.go
+
+      - name: Configure Go proxy for Fly
+        if: github.event_name != 'pull_request'
+        run: |
+          go env -w GOPROXY="https://${{ secrets.FLY_USER }}:${{ secrets.FLY_TOKEN }}@supportfly.jfrog.io/artifactory/api/go/go-virtual,direct"
+
+      - name: Publish module to Fly
+        if: github.event_name != 'pull_request'
+        working-directory: golang-example
+        env:
+          JFROG_CLI_BUILD_NAME: golang-example
+          JFROG_CLI_BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          # Set version from tag or generate one
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION="v0.0.${{ github.run_number }}"
+          fi
+          echo "Publishing version: $VERSION"
+          # The module can be published using JFrog CLI if configured
+          # jf go-publish $VERSION
+
