@@ -64,8 +64,19 @@ configure(javaProjects()) {
                     ? "${project.property('flyUrl')}/artifactory/${project.property('flyRepo')}"
                     : uri("https://supportfly.jfrog.io/artifactory/libs-release-local")
                 credentials {
-                    username = project.findProperty('flyUsername') ?: System.getenv('FLY_USERNAME') ?: ''
-                    password = project.findProperty('flyPassword') ?: System.getenv('FLY_PASSWORD') ?: ''
+                    // Support OIDC token authentication from Fly action
+                    def flyToken = project.findProperty('flyPassword') ?: System.getenv('FLY_TOKEN') ?: System.getenv('JF_ACCESS_TOKEN')
+                    def flyUsername = project.findProperty('flyUsername') ?: System.getenv('FLY_USERNAME') ?: System.getenv('GITHUB_ACTOR') ?: ''
+                    
+                    // If token is available, use it for authentication
+                    if (flyToken) {
+                        username = flyUsername ?: flyToken
+                        password = flyToken
+                    } else {
+                        // Fallback to explicit username/password
+                        username = project.findProperty('flyUsername') ?: System.getenv('FLY_USERNAME') ?: ''
+                        password = project.findProperty('flyPassword') ?: System.getenv('FLY_PASSWORD') ?: ''
+                    }
                 }
             }
         }

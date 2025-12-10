@@ -31,6 +31,7 @@ jobs:
         uses: jfrog/fly-action@v1
         with:
           url: https://supportfly.jfrog.io
+        id: fly
 
       - name: Grant execute permission for gradlew
         working-directory: gradle-examples/gradle-example-publish
@@ -46,13 +47,12 @@ jobs:
         env:
           FLY_URL: https://supportfly.jfrog.io
           FLY_REPO: libs-release-local
-          FLY_USERNAME: ${{ secrets.FLY_USERNAME }}
-          FLY_PASSWORD: ${{ secrets.FLY_PASSWORD }}
+          GITHUB_ACTOR: ${{ github.actor }}
         run: |
           ./gradlew publish \
             -PflyUrl=${FLY_URL} \
             -PflyRepo=${FLY_REPO} \
-            -PflyUsername=${FLY_USERNAME} \
-            -PflyPassword=${FLY_PASSWORD} \
+            -PflyUsername=${GITHUB_ACTOR} \
+            -PflyPassword=${JF_ACCESS_TOKEN} \
             --no-daemon
 
